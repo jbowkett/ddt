@@ -8,25 +8,20 @@
  */
 
 
-// Apply the java plugin to add support for Java
 apply plugin: 'java'
 apply plugin: 'idea'
 sourceCompatibility = 1.8
 
 
-
 // In this section you declare where to find the dependencies of your project
 repositories {
-    // Use 'maven central' for resolving your dependencies.
-    // You can declare any Maven/Ivy/file repository here.
     mavenCentral()
 }
 
 dependencies {
   compile 'junit:junit:4.11',
-        'info.cukes:cucumber-java:1.1.8',
-        'info.cukes:cucumber-junit:1.1.8',
-        'org.mockito:mockito-core:1.9.5'
+        'org.mockito:mockito-core:1.9.5',
+        'org.powermock:powermock-mockito-release-full:1.4.9'
 }
 
 test {
