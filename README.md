@@ -1,5 +1,5 @@
 # ddt
-Devious Database Testing
+## Devious Database Testing
 
 A library to make Database testing a little easier.  It currently comprises:
  * Prepared Statement Spy - this will wrap a prepared statement instance and spy 
