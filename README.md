@@ -13,6 +13,7 @@ A library to make Database testing a little easier.  It currently comprises:
    ```` java
    final PreparedStatement pstmt = Connection.prepareStatement(this.sql);
    try{
+     // decorateStatement is some method of yours that sets the SQL params on the PreparedStatement
      decorateStatement(pstmt);
     }
     catch(SQLException e){
