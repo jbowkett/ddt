@@ -17,7 +17,7 @@ A library to make Database testing a little easier.  It currently comprises:
     }
     catch(SQLException e){
       System.err.println("Cannot execute SQL:");
-      final PreparedStatement stmtSpy = new PreparedStatementSpy(pstmt);
+      final PreparedStatement stmtSpy = new PreparedStatementSpy(pstmt, this.sql);
       decorateStatement(stmtSpy);
       System.err.println("Problematic SQL:"+stmtSpy)
     }
