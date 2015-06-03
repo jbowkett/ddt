@@ -11,16 +11,17 @@ A library to make Database testing a little easier.  It currently comprises:
    so you may only wish to use it when an exception is thrown, see example code:
    
    ```` java
-   final PreparedStatement pstmt = Connection.prepareStatement(this.sql);
-   try{
-     // decorateStatement is some method of yours that sets the SQL params on the PreparedStatement
-     decorateStatement(pstmt);
-    }
-    catch(SQLException e){
-      System.err.println("Cannot execute SQL:");
-      final PreparedStatement stmtSpy = new PreparedStatementSpy(pstmt, this.sql);
-      decorateStatement(stmtSpy);
-      System.err.println("Problematic SQL:"+stmtSpy)
-    }
+    final Connection connection = DriverManager.getConnection("some.url");
+    final PreparedStatement pstmt = connection.prepareStatement(getSql());
+    try{
+      // decorateStatement is some method of yours that sets the SQL params on the PreparedStatement
+      decorateStatement(pstmt);
+     }
+     catch(SQLException e){
+       System.err.println("Cannot execute SQL:");
+       final PreparedStatement stmtSpy = new PreparedStatementSpy(pstmt, getSql());
+       decorateStatement(stmtSpy);
+       System.err.println("Problematic SQL:"+stmtSpy);
+     }
    ````
    
