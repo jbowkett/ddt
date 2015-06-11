@@ -20,8 +20,12 @@ repositories {
 
 dependencies {
   compile 'junit:junit:4.11',
-        'org.mockito:mockito-core:1.9.5',
-        'org.powermock:powermock-mockito-release-full:1.4.9'
+  'cglib:cglib-nodep:2.2.2',
+  'org.javassist:javassist:3.18.2-GA',
+  'org.mockito:mockito-all:1.10.8',
+  'org.objenesis:objenesis:2.1',
+  'org.powermock:powermock-api-mockito:1.6.1',
+  'org.powermock:powermock-module-junit4:1.6.1'
 }
 
 test {
