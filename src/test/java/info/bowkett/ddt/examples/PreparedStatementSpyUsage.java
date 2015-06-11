@@ -1,4 +1,4 @@
-package java.info.bowkett.ddt.examples;
+package info.bowkett.ddt.examples;
 
 import info.bowkett.ddt.PreparedStatementSpy;
 
