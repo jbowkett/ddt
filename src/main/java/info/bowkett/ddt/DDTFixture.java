@@ -3,10 +3,10 @@ package info.bowkett.ddt;
 import org.mockito.stubbing.Answer;
 
 import java.sql.*;
+import java.util.Calendar;
 
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.mock;
 import static org.powermock.api.mockito.PowerMockito.when;
 
@@ -52,12 +52,17 @@ public class DDTFixture {
     given(resultSet.getNClob(anyInt())).will(answerFromResultSet);
     given(resultSet.getNString(anyInt())).will(answerFromResultSet);
     given(resultSet.getObject(anyInt())).will(answerFromResultSet);
+    given(resultSet.getObject(anyInt(), anyMap())).will(answerFromResultSet);
+    given(resultSet.getObject(anyInt(), any(Class.class))).will(answerFromResultSet);
+    given(resultSet.getRef(anyInt())).will(answerFromResultSet);
     given(resultSet.getRowId(anyInt())).will(answerFromResultSet);
     given(resultSet.getShort(anyInt())).will(answerFromResultSet);
     given(resultSet.getSQLXML(anyInt())).will(answerFromResultSet);
     given(resultSet.getString(anyInt())).will(answerFromResultSet);
     given(resultSet.getTime(anyInt())).will(answerFromResultSet);
+    given(resultSet.getTime(anyInt(), any(Calendar.class))).will(answerFromResultSet);
     given(resultSet.getTimestamp(anyInt())).will(answerFromResultSet);
+    given(resultSet.getTimestamp(anyInt(), any(Calendar.class))).will(answerFromResultSet);
     given(resultSet.getURL(anyInt())).will(answerFromResultSet);
     given(resultSet.getBigDecimal(anyInt(), anyInt())).will(answerFromResultSet);
     given(resultSet.getUnicodeStream(anyInt())).will(answerFromResultSet);
