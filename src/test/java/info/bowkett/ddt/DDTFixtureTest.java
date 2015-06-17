@@ -5,10 +5,7 @@ import org.junit.Test;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.sql.Array;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -32,6 +29,16 @@ public class DDTFixtureTest {
     given_AMockConnection();
     given_AMockResultSet();
     given_ADDTFixture();
+    final Row[] rows = given_SomeMockRows();
+    when_SetResultIsCalledWith(rows);
+    then_TheResultSetCanBeIteratedAndRowsAreReturnedInOrder(rows);
+  }
+  
+  @Test
+  public void testAStatementObjectCanBeExecutedAndIteratedInOrder() throws SQLException {
+    given_AMockConnection();
+    given_AMockResultSet();
+    given_ADDTFixtureForAStatement();
     final Row[] rows = given_SomeMockRows();
     when_SetResultIsCalledWith(rows);
     then_TheResultSetCanBeIteratedAndRowsAreReturnedInOrder(rows);
@@ -76,7 +83,11 @@ public class DDTFixtureTest {
   }
 
   private void given_ADDTFixture() {
-    ddtFixture = new DDTFixture(connection, resultSet);
+    ddtFixture = new DDTFixture(connection, resultSet, mock(PreparedStatement.class));
+  }
+
+  private void given_ADDTFixtureForAStatement() {
+    ddtFixture = new DDTFixture(connection, resultSet, mock(Statement.class));
   }
 
   private void when_SetResultIsCalledWith(Row ... rows) throws SQLException {

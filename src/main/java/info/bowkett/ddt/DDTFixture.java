@@ -16,22 +16,88 @@ import static org.powermock.api.mockito.PowerMockito.when;
 public class DDTFixture {
   private final ResultSet resultSet;
   private final Connection connection;
+  private CallableStatement callableStatement;
+  private Statement statement;
+  private PreparedStatement preparedStatement;
 
-  public DDTFixture(Connection connection) throws SQLException {
-    this(connection, mock(ResultSet.class));
+  public static DDTFixture forPreparedStatement(Connection connection){
+    return new DDTFixture(connection, mock(ResultSet.class), mock(PreparedStatement.class));
   }
-  
-  DDTFixture(Connection connection, ResultSet resultSet){
+
+  public static DDTFixture forStatement(Connection connection){
+    return new DDTFixture(connection, mock(ResultSet.class), mock(Statement.class));
+  }
+
+  public static DDTFixture forCallableStatement(Connection connection) {
+    return new DDTFixture(connection, mock(ResultSet.class), mock(CallableStatement.class));
+  }
+
+  public DDTFixture(Connection connection, ResultSet resultSet, Statement statement){
+    this(connection, resultSet, mock(PreparedStatement.class), statement, mock(CallableStatement.class));
+    wireInStatement(connection, resultSet, statement);
+  }
+
+  public DDTFixture(Connection connection, ResultSet resultSet, PreparedStatement preparedStatement){
+    this(connection, resultSet, preparedStatement, mock(Statement.class), mock(CallableStatement.class));
+    wireInPreparedStatement(connection, resultSet, preparedStatement);
+  }
+
+  public DDTFixture(Connection connection, ResultSet resultSet, CallableStatement callableStatement){
+    this(connection, resultSet, mock(PreparedStatement.class), mock(Statement.class), callableStatement);
+    wireInCallableStatement(connection, resultSet, callableStatement);
+  }
+
+  private DDTFixture(Connection connection, ResultSet resultSet, PreparedStatement preparedStatement, Statement statement, CallableStatement callableStatement){
     this.connection = connection;
     this.resultSet = resultSet;
+    this.preparedStatement = preparedStatement;
+    this.statement = statement;
+    this.callableStatement = callableStatement;
   }
-  
-  public void setResultSet(Row... rows) throws SQLException {
-    final PreparedStatement preparedStatement = mock(PreparedStatement.class);
-    when(connection.prepareStatement(anyString())).thenReturn(preparedStatement);
-    when(preparedStatement.executeQuery()).thenReturn(resultSet);
-    final Answer answerFromResultSet = new SyntheticResultSetAnswer(rows);
 
+  private void wireInPreparedStatement(Connection connection, ResultSet resultSet, PreparedStatement preparedStatement) {
+    try {
+      when(connection.prepareStatement(anyString())).thenReturn(preparedStatement);
+      when(connection.prepareStatement(anyString(), anyInt())).thenReturn(preparedStatement);
+      when(connection.prepareStatement(anyString(), anyInt(), anyInt())).thenReturn(preparedStatement);
+      when(connection.prepareStatement(anyString(), anyInt(), anyInt(), anyInt())).thenReturn(preparedStatement);
+      when(connection.prepareStatement(anyString(), any(new int[0].getClass()) )).thenReturn(preparedStatement);
+      when(connection.prepareStatement(anyString(), any(new String[0].getClass()) )).thenReturn(preparedStatement);
+      when(preparedStatement.executeQuery()).thenReturn(resultSet);
+    }
+    catch (SQLException e) {
+      e.printStackTrace();
+      throw new RuntimeException("Cannot wire in PreparedStatement.  Please report this as a bug.");
+    }
+  }
+  private void wireInStatement(Connection connection, ResultSet resultSet, Statement statement){
+    try{
+      when(connection.createStatement()).thenReturn(statement);
+      when(connection.createStatement(anyInt(), anyInt())).thenReturn(statement);
+      when(connection.createStatement(anyInt(), anyInt(), anyInt())).thenReturn(statement);
+      when(statement.executeQuery(anyString())).thenReturn(resultSet);
+    }
+    catch (SQLException e) {
+      e.printStackTrace();
+      throw new RuntimeException("Cannot wire in Statement.  Please report this as a bug.");
+    }
+  }
+
+  private void wireInCallableStatement(Connection connection, ResultSet resultSet, CallableStatement callableStatement) {
+    try {
+      when(connection.prepareCall(anyString())).thenReturn(callableStatement);
+      when(connection.prepareCall(anyString(), anyInt(), anyInt())).thenReturn(callableStatement);
+      when(connection.prepareCall(anyString(), anyInt(), anyInt(), anyInt())).thenReturn(callableStatement);
+      when(callableStatement.executeQuery()).thenReturn(resultSet);
+    }
+    catch (SQLException e) {
+      e.printStackTrace();
+      throw new RuntimeException("Cannot wire in CallableStatement.  Please report this as a bug.");
+    }
+  }
+
+  public void setResultSet(Row... rows) throws SQLException {
+    final Answer answerFromResultSet = new SyntheticResultSetAnswer(rows);
     given(resultSet.next()).will(answerFromResultSet);
     given(resultSet.getArray(anyInt())).will(answerFromResultSet);
     given(resultSet.getAsciiStream(anyInt())).will(answerFromResultSet);

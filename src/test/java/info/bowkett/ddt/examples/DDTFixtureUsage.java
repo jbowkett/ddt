@@ -27,7 +27,7 @@ public class DDTFixtureUsage {
     final Connection connection = mock(Connection.class);
     PowerMockito.mockStatic(DriverManager.class);
     when(DriverManager.getConnection(anyString())).thenReturn(connection);
-    ddtFixture = new DDTFixture(connection);
+    ddtFixture = DDTFixture.forPreparedStatement(connection);
   }
   
   private SomeClassThatReferencesDriverManager testSubject;
