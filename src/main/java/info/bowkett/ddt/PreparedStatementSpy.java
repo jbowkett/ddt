@@ -5,12 +5,11 @@ import java.io.Reader;
 import java.math.BigDecimal;
 import java.net.URL;
 import java.sql.*;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 /**
  * Created by jbowkett on 27/04/15.
@@ -2880,7 +2879,7 @@ public class PreparedStatementSpy implements PreparedStatement {
     }
   }
 
-  private class AsciiStreamParam implements Param {
+  private static class AsciiStreamParam implements Param {
 
     @Override
     public String toSqlValue() {
@@ -2888,7 +2887,7 @@ public class PreparedStatementSpy implements PreparedStatement {
     }
   }
 
-  private class InputStreamParam implements Param {
+  private static class InputStreamParam implements Param {
 
     @Override
     public String toSqlValue() {
@@ -2896,7 +2895,7 @@ public class PreparedStatementSpy implements PreparedStatement {
     }
   }
 
-  private class ArrayParam implements Param {
+  private static class ArrayParam implements Param {
 
     private final Array value;
 
@@ -2908,19 +2907,11 @@ public class PreparedStatementSpy implements PreparedStatement {
     public String toSqlValue() {
       try {
         final Object[] array = (Object[]) value.getArray();
-        final String arrayContents =
-            Arrays.stream(array)
-                .map(obj -> "'" + obj.toString() + "'")
-                .reduce("", (a, b) -> {
-                  if (a.length() == 0) {
-                    return b.length() > 0 ? b : null;
-                  }
-                  if (b.length() == 0) {
-                    return a;
-                  }
-                  return a + ", " + b;
-                });
-        return '[' + arrayContents + ']';
+        return '[' + 
+                 Arrays.stream(array)
+                .map(ObjectParam::new)
+                .map(ObjectParam::toSqlValue)
+                .collect(Collectors.joining(", ")) + ']';
       }
       catch (SQLException e) {
         e.printStackTrace();
@@ -2929,7 +2920,7 @@ public class PreparedStatementSpy implements PreparedStatement {
     }
   }
 
-  private class BigDecimalParam implements Param {
+  private static class BigDecimalParam implements Param {
     private final BigDecimal param;
 
     public BigDecimalParam(BigDecimal param) {
@@ -2942,14 +2933,14 @@ public class PreparedStatementSpy implements PreparedStatement {
     }
   }
 
-  private class BlobParam implements Param {
+  private static class BlobParam implements Param {
     @Override
     public String toSqlValue() {
       return "<_Blob_>";
     }
   }
 
-  private class BooleanParam implements Param {
+  private static class BooleanParam implements Param {
     private final boolean value;
 
     public BooleanParam(boolean x) {
@@ -2962,11 +2953,11 @@ public class PreparedStatementSpy implements PreparedStatement {
     }
   }
 
-  private class ByteParam implements Param {
+  private static class ByteParam implements Param {
 
-    private final byte x;
+    private final Byte x;
 
-    public ByteParam(byte x){
+    public ByteParam(Byte x){
       this.x = x;
     }
     @Override
@@ -2975,7 +2966,7 @@ public class PreparedStatementSpy implements PreparedStatement {
     }
   }
 
-  private class ByteArrayParam implements Param {
+  private static class ByteArrayParam implements Param {
     private final Byte[] x;
 
     public ByteArrayParam(byte[] x) {
@@ -2987,23 +2978,15 @@ public class PreparedStatementSpy implements PreparedStatement {
 
     @Override
     public String toSqlValue() {
-      final StringBuilder value = new StringBuilder("[");
-      boolean first = true;
-      for (Byte aByte : x) {
-        if(!first)value.append(", ");
-        value.append(new ByteParam(aByte).toSqlValue());
-        first = false;
-      }
-//      Arrays.stream(x).map(ByteParam::new)
-//          .map(ByteParam::toSqlValue)
-//          .forEach((str) -> {
-//            value.append(str).append(", ");
-//          });
-      return value.append(']').toString();
+      return '['+
+          Arrays.stream(x)
+          .map(ByteParam::new)
+          .map(ByteParam::toSqlValue)
+          .collect(Collectors.joining(", ")) +']';
     }
   }
 
-  private class CharstreamParam implements Param {
+  private static class CharstreamParam implements Param {
 
     @Override
     public String toSqlValue() {
@@ -3011,14 +2994,14 @@ public class PreparedStatementSpy implements PreparedStatement {
     }
   }
   
-  private class ClobParam implements Param {
+  private static class ClobParam implements Param {
     @Override
     public String toSqlValue() {
       return "<_Clob_>";
     }
   }
 
-  private class DateParam implements Param {
+  private static class DateParam implements Param {
     private final java.util.Date x;
 
     public DateParam(java.util.Date x) {
@@ -3031,7 +3014,7 @@ public class PreparedStatementSpy implements PreparedStatement {
     }
   }
 
-  private class DoubleParam implements Param {
+  private static class DoubleParam implements Param {
     private final double x;
 
     public DoubleParam(double x) {
@@ -3044,7 +3027,7 @@ public class PreparedStatementSpy implements PreparedStatement {
     }
   }
 
-  private class LongParam implements Param {
+  private static class LongParam implements Param {
     private final long param;
 
     public LongParam(long param) {
@@ -3057,49 +3040,49 @@ public class PreparedStatementSpy implements PreparedStatement {
     }
   }
 
-  private class NCharstreamParam implements Param {
+  private static class NCharstreamParam implements Param {
     @Override
     public String toSqlValue() {
       return "<_Nchar_>";
     }
   }
 
-  private class NClobParam implements Param {
+  private static class NClobParam implements Param {
     @Override
     public String toSqlValue() {
       return "<_Nclob_>";
     }
   }
 
-  private class NullParam implements Param {
+  private static class NullParam implements Param {
     @Override
     public String toSqlValue() {
       return "NULL";
     }
   }
 
-  private class RefParam implements Param {
+  private static class RefParam implements Param {
     @Override
     public String toSqlValue() {
       return "<_Ref_>";
     }
   }
 
-  private class RowIdParam implements Param {
+  private static class RowIdParam implements Param {
     @Override
     public String toSqlValue() {
       return "<_RowId_>";
     }
   }
 
-  private class SQLXMLParam implements Param {
+  private static class SQLXMLParam implements Param {
     @Override
     public String toSqlValue() {
       return "<_SQLXML_>";
     }
   }
 
-  private class URLParam implements Param {
+  private static class URLParam implements Param {
     private final URL x;
 
     public URLParam(URL x) {
@@ -3112,14 +3095,14 @@ public class PreparedStatementSpy implements PreparedStatement {
     }
   }
 
-  private class UnicodeParam implements Param {
+  private static class UnicodeParam implements Param {
     @Override
     public String toSqlValue() {
       return "<_Unicode_>";
     }
   }
 
-  private class ObjectParam implements Param {
+  private static class ObjectParam implements Param {
     private final Object param;
 
     public ObjectParam(Object param) {
