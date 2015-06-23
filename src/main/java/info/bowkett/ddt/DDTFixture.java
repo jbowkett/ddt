@@ -4,6 +4,8 @@ import org.mockito.stubbing.Answer;
 
 import java.sql.*;
 import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.*;
@@ -92,7 +94,16 @@ public class DDTFixture {
   }
 
   public void setResultSet(Row... rows) throws SQLException {
-    final Answer answerFromResultSet = new SyntheticResultSetAnswer(rows);
+    setResultSet(new HashMap<>(), rows);
+  }
+  
+  public void setResultSet(Map<String, Integer> columnMap, Row... rows) throws SQLException {
+    final Answer answerFromResultSet = new SyntheticResultSetAnswer(columnMap, rows);
+    wireInCommonInterceptedMethodsOnResultSet(answerFromResultSet);
+    wireInNamedColumnInterceptedMethodsOnResultSet(answerFromResultSet);
+  }
+
+  private void wireInCommonInterceptedMethodsOnResultSet(Answer answerFromResultSet) throws SQLException {
     given(resultSet.next()).will(answerFromResultSet);
     given(resultSet.getArray(anyInt())).will(answerFromResultSet);
     given(resultSet.getAsciiStream(anyInt())).will(answerFromResultSet);
@@ -105,6 +116,7 @@ public class DDTFixture {
     given(resultSet.getCharacterStream(anyInt())).will(answerFromResultSet);
     given(resultSet.getClob(anyInt())).will(answerFromResultSet);
     given(resultSet.getDate(anyInt())).will(answerFromResultSet);
+    given(resultSet.getDate(anyInt(), any(Calendar.class))).will(answerFromResultSet);
     given(resultSet.getDouble(anyInt())).will(answerFromResultSet);
     given(resultSet.getFloat(anyInt())).will(answerFromResultSet);
     given(resultSet.getInt(anyInt())).will(answerFromResultSet);
@@ -127,5 +139,42 @@ public class DDTFixture {
     given(resultSet.getURL(anyInt())).will(answerFromResultSet);
     given(resultSet.getBigDecimal(anyInt(), anyInt())).will(answerFromResultSet);
     given(resultSet.getUnicodeStream(anyInt())).will(answerFromResultSet);
+  }
+
+  private void wireInNamedColumnInterceptedMethodsOnResultSet(Answer answerFromResultSet) throws SQLException {
+    given(resultSet.getArray(anyString())).will(answerFromResultSet);
+    given(resultSet.getAsciiStream(anyString())).will(answerFromResultSet);
+    given(resultSet.getBigDecimal(anyString())).will(answerFromResultSet);
+    given(resultSet.getBinaryStream(anyString())).will(answerFromResultSet);
+    given(resultSet.getBlob(anyString())).will(answerFromResultSet);
+    given(resultSet.getBoolean(anyString())).will(answerFromResultSet);
+    given(resultSet.getByte(anyString())).will(answerFromResultSet);
+    given(resultSet.getBytes(anyString())).will(answerFromResultSet);
+    given(resultSet.getCharacterStream(anyString())).will(answerFromResultSet);
+    given(resultSet.getClob(anyString())).will(answerFromResultSet);
+    given(resultSet.getDate(anyString())).will(answerFromResultSet);
+    given(resultSet.getDate(anyString(), any(Calendar.class))).will(answerFromResultSet);
+    given(resultSet.getDouble(anyString())).will(answerFromResultSet);
+    given(resultSet.getFloat(anyString())).will(answerFromResultSet);
+    given(resultSet.getInt(anyString())).will(answerFromResultSet);
+    given(resultSet.getLong(anyString())).will(answerFromResultSet);
+    given(resultSet.getNCharacterStream(anyString())).will(answerFromResultSet);
+    given(resultSet.getNClob(anyString())).will(answerFromResultSet);
+    given(resultSet.getNString(anyString())).will(answerFromResultSet);
+    given(resultSet.getObject(anyString())).will(answerFromResultSet);
+    given(resultSet.getObject(anyString(), any(Class.class))).will(answerFromResultSet);
+    given(resultSet.getObject(anyString(), anyMap())).will(answerFromResultSet);
+    given(resultSet.getRef(anyString())).will(answerFromResultSet);
+    given(resultSet.getRowId(anyString())).will(answerFromResultSet);
+    given(resultSet.getShort(anyString())).will(answerFromResultSet);
+    given(resultSet.getSQLXML(anyString())).will(answerFromResultSet);
+    given(resultSet.getString(anyString())).will(answerFromResultSet);
+    given(resultSet.getTime(anyString())).will(answerFromResultSet);
+    given(resultSet.getTime(anyString(), any(Calendar.class))).will(answerFromResultSet);
+    given(resultSet.getTimestamp(anyString())).will(answerFromResultSet);
+    given(resultSet.getTimestamp(anyString(), any(Calendar.class))).will(answerFromResultSet);
+    given(resultSet.getURL(anyString())).will(answerFromResultSet);
+    given(resultSet.getBigDecimal(anyString(), anyInt())).will(answerFromResultSet);
+    given(resultSet.getUnicodeStream(anyString())).will(answerFromResultSet);
   }
 }

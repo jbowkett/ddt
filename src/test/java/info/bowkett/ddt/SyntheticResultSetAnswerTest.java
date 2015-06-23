@@ -8,6 +8,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static org.junit.Assert.assertEquals;
 
@@ -20,10 +21,12 @@ public class SyntheticResultSetAnswerTest {
   private List<Row> rows;
   private SyntheticResultSetAnswer underTest;
   private Object answerFromMethodCall;
+  private ConcurrentHashMap<String, Integer> columnMap;
 
   @Before
   public void runBeforeEachTestCase(){
     rows = new ArrayList<>();
+    columnMap = new ConcurrentHashMap<>();
   }
   
 
@@ -63,8 +66,39 @@ public class SyntheticResultSetAnswerTest {
     then_TheValueReturnedIs("Row 1 VALUE");
   }
 
+  @Test
+  public void testCallingGetString_name_AfterCallingNextWillCallThroughToTheFirstRowWhenAValidNameIsPresent() throws SQLException {
+    given_ARowContainingTheValues("Row 1 VALUE");
+    given_a_ColumnMapOf("name");
+    given_AnAnswerUnderTestWithNamedColumns();
+    when_NextIsCalled();
+    when_CallingGetValue("name");
+    then_TheValueReturnedIs("Row 1 VALUE");
+  }
+
+  @Test(expected=SQLException.class)
+  public void testCallingGetString_name_AfterCallingNextWillCallThroughToTheFirstRowWhenNoValidNamesPresentWillThrow() throws SQLException {
+    given_ARowContainingTheValues("Row 1 VALUE");
+    given_AnAnswerUnderTestWithNamedColumns();
+    when_NextIsCalled();
+    when_CallingGetValue("name");
+    then_AnSQLExceptionIsThrown();
+  }
+
+  private void given_a_ColumnMapOf(String... names) {
+    for (int i = 0; i < names.length; i++) {
+      final String name = names[i];
+      final int jdbcColumnIndex = i+1;
+      columnMap.put(name, jdbcColumnIndex);
+    }
+  }
+
   private void given_AnAnswerUnderTest() {
-    underTest = new SyntheticResultSetAnswer(rows.toArray(new Row[rows.size()]));
+    underTest = new SyntheticResultSetAnswer(columnMap, rows.toArray(new Row[rows.size()]));
+  }
+
+  private void given_AnAnswerUnderTestWithNamedColumns() {
+    underTest = new SyntheticResultSetAnswer(columnMap, rows.toArray(new Row[rows.size()]));
   }
 
   private void given_ARowContainingTheValues(Object... values) {
@@ -77,6 +111,10 @@ public class SyntheticResultSetAnswerTest {
 
   private void when_CallingGetValue(int index) throws SQLException {
     answerFromMethodCall = underTest.answer("getString", index);
+  }
+
+  private void when_CallingGetValue(String name) throws SQLException {
+    answerFromMethodCall = underTest.answer("getString", name);
   }
 
   private void then_NextReturnsTrue() {
