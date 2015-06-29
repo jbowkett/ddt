@@ -10,24 +10,124 @@
 
 apply plugin: 'java'
 apply plugin: 'idea'
-sourceCompatibility = 1.8
+apply plugin: 'maven'
+apply plugin: 'signing'
 
+compileJava {
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
+}
+archivesBaseName = ARCHIVE_NAME
 
-// In this section you declare where to find the dependencies of your project
 repositories {
-    mavenCentral()
+  mavenCentral()
 }
 
 dependencies {
   compile 'junit:junit:4.11',
-  'cglib:cglib-nodep:2.2.2',
-  'org.javassist:javassist:3.18.2-GA',
-  'org.mockito:mockito-all:1.10.8',
-  'org.objenesis:objenesis:2.1',
-  'org.powermock:powermock-api-mockito:1.6.1',
-  'org.powermock:powermock-module-junit4:1.6.1'
+          'cglib:cglib-nodep:2.2.2',
+          'org.javassist:javassist:3.18.2-GA',
+          'org.mockito:mockito-all:1.10.8',
+          'org.objenesis:objenesis:2.1',
+          'org.powermock:powermock-api-mockito:1.6.1',
+          'org.powermock:powermock-module-junit4:1.6.1'
 }
 
 test {
   testLogging.showStandardStreams = true
+}
+
+
+group = GROUP
+version = VERSION_NAME
+
+
+def isReleaseBuild = !version.endsWith("SNAPSHOT")
+
+def sonatypeRepositoryUrl
+
+if (isReleaseBuild) {
+  sonatypeRepositoryUrl = RELEASE_REPOSITORY_URL
+}
+else {
+  sonatypeRepositoryUrl = SNAPSHOT_REPOSITORY_URL
+}
+
+
+javadoc {
+    title = 'DDT - Devious Database Testing'
+
+    options.bottom = '<i>Prepared by James Bowkett 2015. No Rights Reserved.</i>'
+    options.addStringOption('Xdoclint:none', '-quiet')
+    options.addStringOption('XDignore.symbol.file', '-quiet')
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    from tasks.javadoc.destinationDir
+    classifier = 'javadoc'
+}
+
+task sourcesJar(type: Jar) {
+    from sourceSets.main.allSource
+    classifier = 'sources'
+}
+
+
+
+artifacts {
+  archives jar
+  archives javadocJar
+  archives sourcesJar
+}
+
+signing {
+  sign configurations.archives
+}
+
+
+
+uploadArchives {
+  repositories {
+    mavenDeployer {
+
+      if (isReleaseBuild) {
+        beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+      }
+
+      repository(url: sonatypeRepositoryUrl) {
+        authentication(userName: NEXUS_USERNAME, password: NEXUS_PASSWORD)
+      }
+
+
+      pom.project {
+        name = 'DDT'
+        packaging = 'jar'
+        description = 'DDT is a database mocking library for unit testing without the need for a database.'
+        url = 'https://github.com/jbowkett/ddt'
+
+        scm {
+          url = 'https://github.com:jbowkett/ddt.git'
+          connection = 'scm:git@github.com:jbowkett/ddt.git'
+          developerConnection = 'scm:git@github.com:jbowkett/ddt.git'
+        }
+
+        licenses {
+          license {
+            name = 'The unlicense'
+            url = 'http://www.unlicense.org'
+            distribution = 'repo'
+          }
+        }
+
+        developers {
+          developer {
+            id = 'jbowkett'
+            name = 'James Bowkett'
+            email = 'james@bowkett.info'
+            url = 'https://github.com/jbowkett'
+          }
+        }
+      }
+    }
+  }
 }
