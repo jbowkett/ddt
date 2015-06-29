@@ -7,9 +7,7 @@ import java.net.URL;
 import java.sql.*;
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 /**
  * Created by jbowkett on 27/04/15.
@@ -18,7 +16,7 @@ public class PreparedStatementSpy implements PreparedStatement {
 
   private final PreparedStatement pstmt;
   private final String sql;
-  private Map<Integer, Param> sqlIndexToParamMap = new ConcurrentHashMap<>();
+  private ConcurrentHashMap<Integer, Param> sqlIndexToParamMap = new ConcurrentHashMap<>();
 
 
   public PreparedStatementSpy(PreparedStatement pstmt, String sql) {
@@ -1292,117 +1290,6 @@ public class PreparedStatementSpy implements PreparedStatement {
     spy(parameterIndex, new NCharstreamParam());
   }
 
-  /**
-   * <p>Sets the value of the designated parameter with the given object.
-   * <p>
-   * If the second argument is an {@code InputStream} then the stream
-   * must contain the number of bytes specified by scaleOrLength.
-   * If the second argument is a {@code Reader} then the reader must
-   * contain the number of characters specified by scaleOrLength. If these
-   * conditions are not true the driver will generate a
-   * {@code SQLException} when the prepared statement is executed.
-   * <p>
-   * <p>The given Java object will be converted to the given targetSqlType
-   * before being sent to the database.
-   * <p>
-   * If the object has a custom mapping (is of a class implementing the
-   * interface {@code SQLData}),
-   * the JDBC driver should call the method {@code SQLData.writeSQL} to
-   * write it to the SQL data stream.
-   * If, on the other hand, the object is of a class implementing
-   * {@code Ref}, {@code Blob}, {@code Clob},  {@code NClob},
-   * {@code Struct}, {@code java.net.URL},
-   * or {@code Array}, the driver should pass it to the database as a
-   * value of the corresponding SQL type.
-   * <p>
-   * <p>Note that this method may be used to pass database-specific
-   * abstract data types.
-   * <p>
-   * The default implementation will throw {@code SQLFeatureNotSupportedException}
-   *
-   * @param parameterIndex the first parameter is 1, the second is 2, ...
-   * @param x              the object containing the input parameter value
-   * @param targetSqlType  the SQL type to be sent to the database. The
-   *                       scale argument may further qualify this type.
-   * @param scaleOrLength  for {@code java.sql.JDBCType.DECIMAL}
-   *                       or {@code java.sql.JDBCType.NUMERIC types},
-   *                       this is the number of digits after the decimal point. For
-   *                       Java Object types {@code InputStream} and {@code Reader},
-   *                       this is the length
-   *                       of the data in the stream or reader.  For all other types,
-   *                       this value will be ignored.
-   * @throws java.sql.SQLException                    if parameterIndex does not correspond to a
-   *                                                  parameter marker in the SQL statement; if a database access error occurs
-   *                                                  or this method is called on a closed {@code PreparedStatement}  or
-   *                                                  if the Java Object specified by x is an InputStream
-   *                                                  or Reader object and the value of the scale parameter is less
-   *                                                  than zero
-   * @throws java.sql.SQLFeatureNotSupportedException if
-   *                                                  the JDBC driver does not support the specified targetSqlType
-   * @see java.sql.JDBCType
-   * @see java.sql.SQLType
-   * @since 1.8
-   */
-  @Override
-  public void setObject(int parameterIndex, Object x, SQLType targetSqlType, int scaleOrLength) throws SQLException {
-    pstmt.setObject(parameterIndex, x, targetSqlType, scaleOrLength);
-    spy(parameterIndex, new ObjectParam(x));
-  }
-
-  /**
-   * Sets the value of the designated parameter with the given object.
-   * <p>
-   * This method is similar to {@link #setObject(int parameterIndex,
-   * Object x, java.sql.SQLType targetSqlType, int scaleOrLength)},
-   * except that it assumes a scale of zero.
-   * <p>
-   * The default implementation will throw {@code SQLFeatureNotSupportedException}
-   *
-   * @param parameterIndex the first parameter is 1, the second is 2, ...
-   * @param x              the object containing the input parameter value
-   * @param targetSqlType  the SQL type to be sent to the database
-   * @throws java.sql.SQLException                    if parameterIndex does not correspond to a
-   *                                                  parameter marker in the SQL statement; if a database access error occurs
-   *                                                  or this method is called on a closed {@code PreparedStatement}
-   * @throws java.sql.SQLFeatureNotSupportedException if
-   *                                                  the JDBC driver does not support the specified targetSqlType
-   * @see java.sql.JDBCType
-   * @see java.sql.SQLType
-   * @since 1.8
-   */
-  @Override
-  public void setObject(int parameterIndex, Object x, SQLType targetSqlType) throws SQLException {
-    pstmt.setObject(parameterIndex, x, targetSqlType);
-    spy(parameterIndex, new ObjectParam(x));
-  }
-
-  /**
-   * Executes the SQL statement in this <code>PreparedStatement</code> object,
-   * which must be an SQL Data Manipulation Language (DML) statement,
-   * such as <code>INSERT</code>, <code>UPDATE</code> or
-   * <code>DELETE</code>; or an SQL statement that returns nothing,
-   * such as a DDL statement.
-   * <p>
-   * This method should be used when the returned row count may exceed
-   * {@link Integer#MAX_VALUE}.
-   * <p>
-   * The default implementation will throw {@code UnsupportedOperationException}
-   *
-   * @return either (1) the row count for SQL Data Manipulation Language
-   * (DML) statements or (2) 0 for SQL statements that return nothing
-   * @throws java.sql.SQLException        if a database access error occurs;
-   *                                      this method is called on a closed  <code>PreparedStatement</code>
-   *                                      or the SQL statement returns a <code>ResultSet</code> object
-   * @throws java.sql.SQLTimeoutException when the driver has determined that the
-   *                                      timeout value that was specified by the {@code setQueryTimeout}
-   *                                      method has been exceeded and has at least attempted to cancel
-   *                                      the currently running {@code Statement}
-   * @since 1.8
-   */
-  @Override
-  public long executeLargeUpdate() throws SQLException {
-    return pstmt.executeLargeUpdate();
-  }
 
   /**
    * Returns an object that implements the given interface to allow access to
@@ -2532,301 +2419,8 @@ public class PreparedStatementSpy implements PreparedStatement {
     return pstmt.isCloseOnCompletion();
   }
 
-  /**
-   * Retrieves the current result as an update count; if the result
-   * is a <code>ResultSet</code> object or there are no more results, -1
-   * is returned. This method should be called only once per result.
-   * <p>
-   * This method should be used when the returned row count may exceed
-   * {@link Integer#MAX_VALUE}.
-   * <p>
-   * The default implementation will throw {@code UnsupportedOperationException}
-   *
-   * @return the current result as an update count; -1 if the current result
-   * is a <code>ResultSet</code> object or there are no more results
-   * @throws java.sql.SQLException if a database access error occurs or
-   *                               this method is called on a closed <code>Statement</code>
-   * @see #execute
-   * @since 1.8
-   */
-  @Override
-  public long getLargeUpdateCount() throws SQLException {
-    return pstmt.getLargeUpdateCount();
-  }
 
-  /**
-   * Retrieves the maximum number of rows that a
-   * <code>ResultSet</code> object produced by this
-   * <code>Statement</code> object can contain.  If this limit is exceeded,
-   * the excess rows are silently dropped.
-   * <p>
-   * This method should be used when the returned row limit may exceed
-   * {@link Integer#MAX_VALUE}.
-   * <p>
-   * The default implementation will return {@code 0}
-   *
-   * @return the current maximum number of rows for a <code>ResultSet</code>
-   * object produced by this <code>Statement</code> object;
-   * zero means there is no limit
-   * @throws java.sql.SQLException if a database access error occurs or
-   *                               this method is called on a closed <code>Statement</code>
-   * @see #setMaxRows
-   * @since 1.8
-   */
-  @Override
-  public long getLargeMaxRows() throws SQLException {
-    return pstmt.getLargeMaxRows();
-  }
 
-  /**
-   * Sets the limit for the maximum number of rows that any
-   * <code>ResultSet</code> object  generated by this <code>Statement</code>
-   * object can contain to the given number.
-   * If the limit is exceeded, the excess
-   * rows are silently dropped.
-   * <p>
-   * This method should be used when the row limit may exceed
-   * {@link Integer#MAX_VALUE}.
-   * <p>
-   * The default implementation will throw {@code UnsupportedOperationException}
-   *
-   * @param max the new max rows limit; zero means there is no limit
-   * @throws java.sql.SQLException if a database access error occurs,
-   *                               this method is called on a closed <code>Statement</code>
-   *                               or the condition {@code max >= 0} is not satisfied
-   * @see #getMaxRows
-   * @since 1.8
-   */
-  @Override
-  public void setLargeMaxRows(long max) throws SQLException {
-    pstmt.setLargeMaxRows(max);
-  }
-
-  /**
-   * Submits a batch of commands to the database for execution and
-   * if all commands execute successfully, returns an array of update counts.
-   * The <code>long</code> elements of the array that is returned are ordered
-   * to correspond to the commands in the batch, which are ordered
-   * according to the order in which they were added to the batch.
-   * The elements in the array returned by the method {@code executeLargeBatch}
-   * may be one of the following:
-   * <OL>
-   * <LI>A number greater than or equal to zero -- indicates that the
-   * command was processed successfully and is an update count giving the
-   * number of rows in the database that were affected by the command's
-   * execution
-   * <LI>A value of <code>SUCCESS_NO_INFO</code> -- indicates that the command was
-   * processed successfully but that the number of rows affected is
-   * unknown
-   * <p>
-   * If one of the commands in a batch update fails to execute properly,
-   * this method throws a <code>BatchUpdateException</code>, and a JDBC
-   * driver may or may not continue to process the remaining commands in
-   * the batch.  However, the driver's behavior must be consistent with a
-   * particular DBMS, either always continuing to process commands or never
-   * continuing to process commands.  If the driver continues processing
-   * after a failure, the array returned by the method
-   * <code>BatchUpdateException.getLargeUpdateCounts</code>
-   * will contain as many elements as there are commands in the batch, and
-   * at least one of the elements will be the following:
-   * <p>
-   * <LI>A value of <code>EXECUTE_FAILED</code> -- indicates that the command failed
-   * to execute successfully and occurs only if a driver continues to
-   * process commands after a command fails
-   * </OL>
-   * <p>
-   * This method should be used when the returned row count may exceed
-   * {@link Integer#MAX_VALUE}.
-   * <p>
-   * The default implementation will throw {@code UnsupportedOperationException}
-   *
-   * @return an array of update counts containing one element for each
-   * command in the batch.  The elements of the array are ordered according
-   * to the order in which commands were added to the batch.
-   * @throws java.sql.SQLException        if a database access error occurs,
-   *                                      this method is called on a closed <code>Statement</code> or the
-   *                                      driver does not support batch statements. Throws {@link java.sql.BatchUpdateException}
-   *                                      (a subclass of <code>SQLException</code>) if one of the commands sent to the
-   *                                      database fails to execute properly or attempts to return a result set.
-   * @throws java.sql.SQLTimeoutException when the driver has determined that the
-   *                                      timeout value that was specified by the {@code setQueryTimeout}
-   *                                      method has been exceeded and has at least attempted to cancel
-   *                                      the currently running {@code Statement}
-   * @see #addBatch
-   * @see java.sql.DatabaseMetaData#supportsBatchUpdates
-   * @since 1.8
-   */
-  @Override
-  public long[] executeLargeBatch() throws SQLException {
-    return pstmt.executeLargeBatch();
-  }
-
-  /**
-   * Executes the given SQL statement, which may be an <code>INSERT</code>,
-   * <code>UPDATE</code>, or <code>DELETE</code> statement or an
-   * SQL statement that returns nothing, such as an SQL DDL statement.
-   * <p>
-   * This method should be used when the returned row count may exceed
-   * {@link Integer#MAX_VALUE}.
-   * <p>
-   * <strong>Note:</strong>This method cannot be called on a
-   * <code>PreparedStatement</code> or <code>CallableStatement</code>.
-   * <p>
-   * The default implementation will throw {@code UnsupportedOperationException}
-   *
-   * @param sql an SQL Data Manipulation Language (DML) statement,
-   *            such as <code>INSERT</code>, <code>UPDATE</code> or
-   *            <code>DELETE</code>; or an SQL statement that returns nothing,
-   *            such as a DDL statement.
-   * @return either (1) the row count for SQL Data Manipulation Language
-   * (DML) statements or (2) 0 for SQL statements that return nothing
-   * @throws java.sql.SQLException        if a database access error occurs,
-   *                                      this method is called on a closed <code>Statement</code>, the given
-   *                                      SQL statement produces a <code>ResultSet</code> object, the method is called on a
-   *                                      <code>PreparedStatement</code> or <code>CallableStatement</code>
-   * @throws java.sql.SQLTimeoutException when the driver has determined that the
-   *                                      timeout value that was specified by the {@code setQueryTimeout}
-   *                                      method has been exceeded and has at least attempted to cancel
-   *                                      the currently running {@code Statement}
-   * @since 1.8
-   */
-  @Override
-  public long executeLargeUpdate(String sql) throws SQLException {
-    return pstmt.executeLargeUpdate(sql);
-  }
-
-  /**
-   * Executes the given SQL statement and signals the driver with the
-   * given flag about whether the
-   * auto-generated keys produced by this <code>Statement</code> object
-   * should be made available for retrieval.  The driver will ignore the
-   * flag if the SQL statement
-   * is not an <code>INSERT</code> statement, or an SQL statement able to return
-   * auto-generated keys (the list of such statements is vendor-specific).
-   * <p>
-   * This method should be used when the returned row count may exceed
-   * {@link Integer#MAX_VALUE}.
-   * <p>
-   * <strong>Note:</strong>This method cannot be called on a
-   * <code>PreparedStatement</code> or <code>CallableStatement</code>.
-   * <p>
-   * The default implementation will throw {@code SQLFeatureNotSupportedException}
-   *
-   * @param sql               an SQL Data Manipulation Language (DML) statement,
-   *                          such as <code>INSERT</code>, <code>UPDATE</code> or
-   *                          <code>DELETE</code>; or an SQL statement that returns nothing,
-   *                          such as a DDL statement.
-   * @param autoGeneratedKeys a flag indicating whether auto-generated keys
-   *                          should be made available for retrieval;
-   *                          one of the following constants:
-   *                          <code>Statement.RETURN_GENERATED_KEYS</code>
-   *                          <code>Statement.NO_GENERATED_KEYS</code>
-   * @return either (1) the row count for SQL Data Manipulation Language (DML) statements
-   * or (2) 0 for SQL statements that return nothing
-   * @throws java.sql.SQLException                    if a database access error occurs,
-   *                                                  this method is called on a closed <code>Statement</code>, the given
-   *                                                  SQL statement returns a <code>ResultSet</code> object,
-   *                                                  the given constant is not one of those allowed, the method is called on a
-   *                                                  <code>PreparedStatement</code> or <code>CallableStatement</code>
-   * @throws java.sql.SQLFeatureNotSupportedException if the JDBC driver does not support
-   *                                                  this method with a constant of Statement.RETURN_GENERATED_KEYS
-   * @throws java.sql.SQLTimeoutException             when the driver has determined that the
-   *                                                  timeout value that was specified by the {@code setQueryTimeout}
-   *                                                  method has been exceeded and has at least attempted to cancel
-   *                                                  the currently running {@code Statement}
-   * @since 1.8
-   */
-  @Override
-  public long executeLargeUpdate(String sql, int autoGeneratedKeys) throws SQLException {
-    return pstmt.executeLargeUpdate(sql, autoGeneratedKeys);
-  }
-
-  /**
-   * Executes the given SQL statement and signals the driver that the
-   * auto-generated keys indicated in the given array should be made available
-   * for retrieval.   This array contains the indexes of the columns in the
-   * target table that contain the auto-generated keys that should be made
-   * available. The driver will ignore the array if the SQL statement
-   * is not an <code>INSERT</code> statement, or an SQL statement able to return
-   * auto-generated keys (the list of such statements is vendor-specific).
-   * <p>
-   * This method should be used when the returned row count may exceed
-   * {@link Integer#MAX_VALUE}.
-   * <p>
-   * <strong>Note:</strong>This method cannot be called on a
-   * <code>PreparedStatement</code> or <code>CallableStatement</code>.
-   * <p>
-   * The default implementation will throw {@code SQLFeatureNotSupportedException}
-   *
-   * @param sql           an SQL Data Manipulation Language (DML) statement,
-   *                      such as <code>INSERT</code>, <code>UPDATE</code> or
-   *                      <code>DELETE</code>; or an SQL statement that returns nothing,
-   *                      such as a DDL statement.
-   * @param columnIndexes an array of column indexes indicating the columns
-   *                      that should be returned from the inserted row
-   * @return either (1) the row count for SQL Data Manipulation Language (DML) statements
-   * or (2) 0 for SQL statements that return nothing
-   * @throws java.sql.SQLException                    if a database access error occurs,
-   *                                                  this method is called on a closed <code>Statement</code>, the SQL
-   *                                                  statement returns a <code>ResultSet</code> object,the second argument
-   *                                                  supplied to this method is not an
-   *                                                  <code>int</code> array whose elements are valid column indexes, the method is called on a
-   *                                                  <code>PreparedStatement</code> or <code>CallableStatement</code>
-   * @throws java.sql.SQLFeatureNotSupportedException if the JDBC driver does not support this method
-   * @throws java.sql.SQLTimeoutException             when the driver has determined that the
-   *                                                  timeout value that was specified by the {@code setQueryTimeout}
-   *                                                  method has been exceeded and has at least attempted to cancel
-   *                                                  the currently running {@code Statement}
-   * @since 1.8
-   */
-  @Override
-  public long executeLargeUpdate(String sql, int[] columnIndexes) throws SQLException {
-    return pstmt.executeLargeUpdate(sql, columnIndexes);
-  }
-
-  /**
-   * Executes the given SQL statement and signals the driver that the
-   * auto-generated keys indicated in the given array should be made available
-   * for retrieval.   This array contains the names of the columns in the
-   * target table that contain the auto-generated keys that should be made
-   * available. The driver will ignore the array if the SQL statement
-   * is not an <code>INSERT</code> statement, or an SQL statement able to return
-   * auto-generated keys (the list of such statements is vendor-specific).
-   * <p>
-   * This method should be used when the returned row count may exceed
-   * {@link Integer#MAX_VALUE}.
-   * <p>
-   * <strong>Note:</strong>This method cannot be called on a
-   * <code>PreparedStatement</code> or <code>CallableStatement</code>.
-   * <p>
-   * The default implementation will throw {@code SQLFeatureNotSupportedException}
-   *
-   * @param sql         an SQL Data Manipulation Language (DML) statement,
-   *                    such as <code>INSERT</code>, <code>UPDATE</code> or
-   *                    <code>DELETE</code>; or an SQL statement that returns nothing,
-   *                    such as a DDL statement.
-   * @param columnNames an array of the names of the columns that should be
-   *                    returned from the inserted row
-   * @return either the row count for <code>INSERT</code>, <code>UPDATE</code>,
-   * or <code>DELETE</code> statements, or 0 for SQL statements
-   * that return nothing
-   * @throws java.sql.SQLException                    if a database access error occurs,
-   *                                                  this method is called on a closed <code>Statement</code>, the SQL
-   *                                                  statement returns a <code>ResultSet</code> object, the
-   *                                                  second argument supplied to this method is not a <code>String</code> array
-   *                                                  whose elements are valid column names, the method is called on a
-   *                                                  <code>PreparedStatement</code> or <code>CallableStatement</code>
-   * @throws java.sql.SQLFeatureNotSupportedException if the JDBC driver does not support this method
-   * @throws java.sql.SQLTimeoutException             when the driver has determined that the
-   *                                                  timeout value that was specified by the {@code setQueryTimeout}
-   *                                                  method has been exceeded and has at least attempted to cancel
-   *                                                  the currently running {@code Statement}
-   * @since 1.8
-   */
-  @Override
-  public long executeLargeUpdate(String sql, String[] columnNames) throws SQLException {
-    return pstmt.executeLargeUpdate(sql, columnNames);
-  }
 
   public String toString() {
     final StringBuilder buffer = new StringBuilder();
@@ -2846,7 +2440,8 @@ public class PreparedStatementSpy implements PreparedStatement {
   }
 
   private Param getParamAt(int sqlParamIndex) {
-    return sqlIndexToParamMap.getOrDefault(sqlParamIndex, new UnsetParam());
+    sqlIndexToParamMap.putIfAbsent(sqlParamIndex, new UnsetParam());
+    return sqlIndexToParamMap.get(sqlParamIndex);
   }
 
   private void spy(int sqlIndex, Param param) {
@@ -2906,12 +2501,13 @@ public class PreparedStatementSpy implements PreparedStatement {
     @Override
     public String toSqlValue() {
       try {
-        final Object[] array = (Object[]) value.getArray();
-        return '[' + 
-                 Arrays.stream(array)
-                .map(ObjectParam::new)
-                .map(ObjectParam::toSqlValue)
-                .collect(Collectors.joining(", ")) + ']';
+        final Object[] objArray = (Object[]) value.getArray();
+        final String[] strArray = new String[objArray.length];
+        for (int i = 0; i < objArray.length; i++) {
+          strArray[i] = '\''+objArray[i].toString()+'\'';
+
+        }
+        return Arrays.toString(strArray);
       }
       catch (SQLException e) {
         e.printStackTrace();
@@ -2978,11 +2574,12 @@ public class PreparedStatementSpy implements PreparedStatement {
 
     @Override
     public String toSqlValue() {
-      return '['+
-          Arrays.stream(x)
-          .map(ByteParam::new)
-          .map(ByteParam::toSqlValue)
-          .collect(Collectors.joining(", ")) +']';
+      final String[] byteParams = new String[x.length];
+      for (int i = 0; i < x.length; i++) {
+        final Byte aByte = x[i];
+        byteParams[i] = new ByteParam(aByte).toSqlValue();
+      }
+      return Arrays.toString(byteParams);
     }
   }
 

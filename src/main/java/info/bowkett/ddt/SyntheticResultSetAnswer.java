@@ -18,7 +18,7 @@ public class SyntheticResultSetAnswer implements Answer {
   private Row row = null;
   
   public SyntheticResultSetAnswer(Row[] rows){
-    this(new HashMap<>(), rows);
+    this(new HashMap<String, Integer>(), rows);
   }
   
   public SyntheticResultSetAnswer(Map<String, Integer> columnMap, Row[] rows){

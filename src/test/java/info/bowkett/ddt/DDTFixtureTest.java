@@ -7,7 +7,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.sql.*;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -1674,51 +1673,57 @@ public class DDTFixtureTest {
   public void printTestMethodsForGetters(){
     final Method[] methods = ResultSet.class.getMethods();
     final Set<String> whenMethods = new HashSet<>();
-    Arrays.stream(methods)
-        .filter(m -> m.getName().startsWith("get"))
-        .forEach((method) -> {
 
 
-          final String methodName = method.getName();
-          final String methodNameStartingWithCapital = Character.toUpperCase(methodName.charAt(0)) + methodName.substring(1);
-          final String paramTypes =
-              Arrays.stream(method.getParameterTypes())
-                  .map(Class::getSimpleName)
-                  .collect(Collectors.joining());
-          if (paramTypes.startsWith("int")) {
-            System.out.println("  // IGNORING :: "+method);
-          }
-          else {
-            System.out.println("  //"+method);
-            final String testMethodName = methodNameStartingWithCapital + paramTypes;
-            final String returnTypeName = method.getReturnType().getName();
-            final String mockReturnType = "final " + returnTypeName + " mock = mock(" + returnTypeName + ".class);\n";
-            final String testMethod = "" +
-                "  @Test\n" +
-                "  public void testTheCorrectResultIsReturnedFrom" + testMethodName + "() throws SQLException {\n" +
-                "    given_AMockConnection();\n" +
-                "    given_AMockResultSet();\n" +
-                "    given_AColumnMapContaining(\"name\");\n" +
-                "    given_ADDTFixture();\n" +
-                "    " + mockReturnType +
-                "    given_ARowContainingTheValues(mock);\n" +
-                "    when_SetResultIsCalledWith(columnMap, row);\n" +
-                "    when_" + methodNameStartingWithCapital + "IsCalledOnColumnNamed(\"name\");\n" +
-                "    then_TheResultIs(mock);\n" +
-                "  }\n\n";
+    for (Method method : methods) {
+      if (method.getName().startsWith("get")) {
+        break;
+      }
+      final String methodName = method.getName();
+      final String methodNameStartingWithCapital = Character.toUpperCase(methodName.charAt(0)) + methodName.substring(1);
+      final List<String> params = new ArrayList<>();
+      final Class<?>[] parameterTypes = method.getParameterTypes();
+      for (Class<?> parameterType : parameterTypes) {
+        params.add(parameterType.getSimpleName());
+      }
+      
+      final String paramTypes = Arrays.toString(params.toArray());
+      if (paramTypes.startsWith("int")) {
+        System.out.println("  // IGNORING :: " + method);
+      }
+      else {
+        System.out.println("  //" + method);
+        final String testMethodName = methodNameStartingWithCapital + paramTypes;
+        final String returnTypeName = method.getReturnType().getName();
+        final String mockReturnType = "final " + returnTypeName + " mock = mock(" + returnTypeName + ".class);\n";
+        final String testMethod = "" +
+            "  @Test\n" +
+            "  public void testTheCorrectResultIsReturnedFrom" + testMethodName + "() throws SQLException {\n" +
+            "    given_AMockConnection();\n" +
+            "    given_AMockResultSet();\n" +
+            "    given_AColumnMapContaining(\"name\");\n" +
+            "    given_ADDTFixture();\n" +
+            "    " + mockReturnType +
+            "    given_ARowContainingTheValues(mock);\n" +
+            "    when_SetResultIsCalledWith(columnMap, row);\n" +
+            "    when_" + methodNameStartingWithCapital + "IsCalledOnColumnNamed(\"name\");\n" +
+            "    then_TheResultIs(mock);\n" +
+            "  }\n\n";
 
-            System.out.println(testMethod);
+        System.out.println(testMethod);
 
-            final String whenMethod = "" +
-                "  private void when_" + methodNameStartingWithCapital + "IsCalledOnColumnNamed(String columnName) throws SQLException {\n" +
-                "    while(resultSet.next()){\n" +
-                "      resultOfGetterCall = resultSet." + methodName + "(columnName);\n" +
-                "    }\n" +
-                "  }\n\n";
-            whenMethods.add(whenMethod);
-          }
-        });
-    whenMethods.stream().forEach(System.out::println);
+        final String whenMethod = "" +
+            "  private void when_" + methodNameStartingWithCapital + "IsCalledOnColumnNamed(String columnName) throws SQLException {\n" +
+            "    while(resultSet.next()){\n" +
+            "      resultOfGetterCall = resultSet." + methodName + "(columnName);\n" +
+            "    }\n" +
+            "  }\n\n";
+        whenMethods.add(whenMethod);
+      }
+      for (String whenMethod : whenMethods) {
+        System.out.println(whenMethod);
+      }
+    }
   }
 }
 

@@ -94,7 +94,7 @@ public class DDTFixture {
   }
 
   public void setResultSet(Row... rows) throws SQLException {
-    setResultSet(new HashMap<>(), rows);
+    setResultSet(new HashMap<String, Integer>(), rows);
   }
   
   public void setResultSet(Map<String, Integer> columnMap, Row... rows) throws SQLException {
