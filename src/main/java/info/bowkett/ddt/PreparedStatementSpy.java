@@ -16,7 +16,7 @@ public class PreparedStatementSpy implements PreparedStatement {
 
   private final PreparedStatement pstmt;
   private final String sql;
-  private ConcurrentHashMap<Integer, Param> sqlIndexToParamMap = new ConcurrentHashMap<>();
+  private ConcurrentHashMap<Integer, Param> sqlIndexToParamMap = new ConcurrentHashMap<Integer, Param>();
 
 
   public PreparedStatementSpy(PreparedStatement pstmt, String sql) {
@@ -2382,41 +2382,6 @@ public class PreparedStatementSpy implements PreparedStatement {
   @Override
   public void setPoolable(boolean poolable) throws SQLException {
     pstmt.setPoolable(poolable);
-  }
-
-  /**
-   * Specifies that this {@code Statement} will be closed when all its
-   * dependent result sets are closed. If execution of the {@code Statement}
-   * does not produce any result sets, this method has no effect.
-   * <p>
-   * <strong>Note:</strong> Multiple calls to {@code closeOnCompletion} do
-   * not toggle the effect on this {@code Statement}. However, a call to
-   * {@code closeOnCompletion} does effect both the subsequent execution of
-   * statements, and statements that currently have open, dependent,
-   * result sets.
-   *
-   * @throws java.sql.SQLException if this method is called on a closed
-   *                               {@code Statement}
-   * @since 1.7
-   */
-  @Override
-  public void closeOnCompletion() throws SQLException {
-    pstmt.closeOnCompletion();
-  }
-
-  /**
-   * Returns a value indicating whether this {@code Statement} will be
-   * closed when all its dependent result sets are closed.
-   *
-   * @return {@code true} if the {@code Statement} will be closed when all
-   * of its dependent result sets are closed; {@code false} otherwise
-   * @throws java.sql.SQLException if this method is called on a closed
-   *                               {@code Statement}
-   * @since 1.7
-   */
-  @Override
-  public boolean isCloseOnCompletion() throws SQLException {
-    return pstmt.isCloseOnCompletion();
   }
 
 

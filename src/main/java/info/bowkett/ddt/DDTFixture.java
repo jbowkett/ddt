@@ -126,7 +126,6 @@ public class DDTFixture {
     given(resultSet.getNString(anyInt())).will(answerFromResultSet);
     given(resultSet.getObject(anyInt())).will(answerFromResultSet);
     given(resultSet.getObject(anyInt(), anyMap())).will(answerFromResultSet);
-    given(resultSet.getObject(anyInt(), any(Class.class))).will(answerFromResultSet);
     given(resultSet.getRef(anyInt())).will(answerFromResultSet);
     given(resultSet.getRowId(anyInt())).will(answerFromResultSet);
     given(resultSet.getShort(anyInt())).will(answerFromResultSet);
@@ -162,7 +161,6 @@ public class DDTFixture {
     given(resultSet.getNClob(anyString())).will(answerFromResultSet);
     given(resultSet.getNString(anyString())).will(answerFromResultSet);
     given(resultSet.getObject(anyString())).will(answerFromResultSet);
-    given(resultSet.getObject(anyString(), any(Class.class))).will(answerFromResultSet);
     given(resultSet.getObject(anyString(), anyMap())).will(answerFromResultSet);
     given(resultSet.getRef(anyString())).will(answerFromResultSet);
     given(resultSet.getRowId(anyString())).will(answerFromResultSet);

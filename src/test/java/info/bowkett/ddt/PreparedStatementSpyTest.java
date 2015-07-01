@@ -98,11 +98,6 @@ public class PreparedStatementSpyTest {
     then(pstmt, once()).close();
   }
 
-  @Test
-  public void testCloseOnCompletionIsCalledOnDelegate() throws Exception {
-    given_aPlainStatement().closeOnCompletion();
-    then(pstmt, once()).closeOnCompletion();
-  }
 
   @Test
   public void testExecuteIsCalledOnDelegate() throws Exception {
@@ -297,11 +292,6 @@ public class PreparedStatementSpyTest {
     then(pstmt, once()).getWarnings();
   }
 
-  @Test
-  public void testIsCloseOnCompletionIsCalledOnDelegate() throws Exception {
-    given_aPlainStatement().isCloseOnCompletion();
-    then(pstmt, once()).isCloseOnCompletion();
-  }
 
   @Test
   public void testIsClosedIsCalledOnDelegate() throws Exception {

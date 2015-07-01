@@ -54,7 +54,7 @@ public class DDTFixtureTest {
   }
 
   private void given_AColumnMapContaining(String ... columnNames){
-    columnMap = new HashMap<>();
+    columnMap = new HashMap<String, Integer>();
     for (int i = 0; i < columnNames.length; i++) {
       final String columnName = columnNames[i];
       final int jdbcColumnIndex = i + 1;
@@ -134,22 +134,6 @@ public class DDTFixtureTest {
       when_GetObjectIsCalledOnColumn(1);
       then_TheResultIs(mock);
     }
-
-
-    // IGNORING :: public abstract java.lang.Object java.sql.ResultSet.getObject(java.lang.String,java.util.Map) throws java.sql.SQLException
-    //public abstract java.lang.Object java.sql.ResultSet.getObject(int,java.lang.Class) throws java.sql.SQLException
-    @Test
-    public void testTheCorrectResultIsReturnedFromGetObjectIntClass() throws SQLException {
-      given_AMockConnection();
-      given_AMockResultSet();
-      given_ADDTFixture();
-      final java.lang.Object mock = mock(java.lang.Object.class);
-      given_ARowContainingTheValues(mock);
-      when_SetResultIsCalledWith(row);
-      when_GetObjectClassIsCalledOnColumn(1);
-      then_TheResultIs(mock);
-    }
-
 
     // IGNORING :: public abstract java.lang.Object java.sql.ResultSet.getObject(java.lang.String,java.lang.Class) throws java.sql.SQLException
     //public abstract boolean java.sql.ResultSet.getBoolean(int) throws java.sql.SQLException
@@ -756,22 +740,17 @@ public class DDTFixtureTest {
         resultOfGetterCall = resultSet.getObject(index);
       }
     }
-    private void when_GetObjectClassIsCalledOnColumn(int index) throws SQLException {
-      while(resultSet.next()){
-        resultOfGetterCall = resultSet.getObject(index, String.class);
-      }
-    }
 
   private void when_GetObjectMapIsCalledOnColumn(int index) throws SQLException {
     while(resultSet.next()){
-      final Map<String, Class<?>> map = new HashMap<>();
+      final Map<String, Class<?>> map = new HashMap<String, Class<?>>();
       resultOfGetterCall = resultSet.getObject(index, map);
     }
   }
 
   private void when_GetObjectMapIsCalledOnColumnNamed(String columnName) throws SQLException {
     while(resultSet.next()){
-      final Map<String, Class<?>> map = new HashMap<>();
+      final Map<String, Class<?>> map = new HashMap<String, Class<?>>();
       resultOfGetterCall = resultSet.getObject(columnName, map);
     }
   }
@@ -899,22 +878,6 @@ public class DDTFixtureTest {
     given_ARowContainingTheValues(mock);
     when_SetResultIsCalledWith(columnMap, row);
     when_GetObjectMapIsCalledOnColumnNamed("name");
-    then_TheResultIs(mock);
-  }
-
-
-  // IGNORING :: public abstract java.lang.Object java.sql.ResultSet.getObject(int,java.lang.Class) throws java.sql.SQLException
-  //public abstract java.lang.Object java.sql.ResultSet.getObject(java.lang.String,java.lang.Class) throws java.sql.SQLException
-  @Test
-  public void testTheCorrectResultIsReturnedFromGetObjectStringClass() throws SQLException {
-    given_AMockConnection();
-    given_AMockResultSet();
-    given_AColumnMapContaining("name");
-    given_ADDTFixture();
-    final java.lang.Object mock = mock(java.lang.Object.class);
-    given_ARowContainingTheValues(mock);
-    when_SetResultIsCalledWith(columnMap, row);
-    when_GetObjectIsCalledOnColumnNamed("name", String.class);
     then_TheResultIs(mock);
   }
 
@@ -1498,13 +1461,6 @@ public class DDTFixtureTest {
     }
   }
   
-  private void when_GetObjectIsCalledOnColumnNamed(String columnName, Class clazz) throws SQLException {
-    while(resultSet.next()){
-      resultOfGetterCall = resultSet.getObject(columnName, clazz);
-    }
-  }
-  
-
 
   private void when_GetRefIsCalledOnColumnNamed(String columnName) throws SQLException {
     while(resultSet.next()){
@@ -1672,7 +1628,7 @@ public class DDTFixtureTest {
 //  @Test
   public void printTestMethodsForGetters(){
     final Method[] methods = ResultSet.class.getMethods();
-    final Set<String> whenMethods = new HashSet<>();
+    final Set<String> whenMethods = new HashSet<String>();
 
 
     for (Method method : methods) {
@@ -1681,7 +1637,7 @@ public class DDTFixtureTest {
       }
       final String methodName = method.getName();
       final String methodNameStartingWithCapital = Character.toUpperCase(methodName.charAt(0)) + methodName.substring(1);
-      final List<String> params = new ArrayList<>();
+      final List<String> params = new ArrayList<String>();
       final Class<?>[] parameterTypes = method.getParameterTypes();
       for (Class<?> parameterType : parameterTypes) {
         params.add(parameterType.getSimpleName());

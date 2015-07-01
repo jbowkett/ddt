@@ -25,8 +25,8 @@ public class SyntheticResultSetAnswerTest {
 
   @Before
   public void runBeforeEachTestCase(){
-    rows = new ArrayList<>();
-    columnMap = new ConcurrentHashMap<>();
+    rows = new ArrayList<Row>();
+    columnMap = new ConcurrentHashMap<String, Integer>();
   }
   
 
